@@ -8,3 +8,4 @@ pyjwt[crypto]
 passlib[bcrypt]
 stripe
 sqlalchemy
+email-validator
