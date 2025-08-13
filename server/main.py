@@ -48,10 +48,21 @@ openai_client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 if STRIPE_SECRET_KEY:
     stripe.api_key = STRIPE_SECRET_KEY
 
-# CORS Middleware
+# CORS Middleware - Allow multiple origins for Vercel deployments
+allowed_origins = [
+    CLIENT_URL,
+    "https://furtoon.vercel.app",
+    "https://furtoon-production.vercel.app",
+]
+
+# Add any Vercel preview deployments
+if CLIENT_URL and "vercel.app" in CLIENT_URL:
+    # Allow all Vercel subdomains for this project
+    allowed_origins.append("https://*.vercel.app")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[CLIENT_URL],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
