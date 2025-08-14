@@ -8,7 +8,7 @@ import stripe
 from datetime import datetime
 from typing import List
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Depends, status
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Depends, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from openai import AsyncOpenAI
@@ -257,35 +257,68 @@ async def create_stripe_checkout(
         )
 
 @app.post("/api/payments/webhook")
-async def stripe_webhook(request: dict, db: Session = Depends(get_db)):
+async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     """Handle Stripe webhook events"""
-    # This would need proper webhook signature verification in production
-    # For now, we'll handle the basic payment success event
-    
-    if request.get('type') == 'checkout.session.completed':
-        session = request['data']['object']
-        user_id = session['metadata']['user_id']
-        tier = session['metadata']['tier']
-        credits = int(session['metadata']['credits'])
+    try:
+        # Get the raw body
+        payload = await request.body()
+        sig_header = request.headers.get('stripe-signature')
         
-        # Find the user and purchase
-        user = db.query(User).filter(User.id == user_id).first()
-        purchase = db.query(Purchase).filter(
-            Purchase.stripe_session_id == session['id']
-        ).first()
+        # Verify webhook signature if we have the secret
+        if os.getenv('STRIPE_WEBHOOK_SECRET') and sig_header:
+            try:
+                event = stripe.Webhook.construct_event(
+                    payload, sig_header, os.getenv('STRIPE_WEBHOOK_SECRET')
+                )
+            except ValueError as e:
+                print(f"Invalid payload: {e}")
+                raise HTTPException(status_code=400, detail="Invalid payload")
+            except stripe.SignatureVerificationError as e:
+                print(f"Invalid signature: {e}")
+                raise HTTPException(status_code=400, detail="Invalid signature")
+        else:
+            # Fallback: parse JSON manually (for testing)
+            import json
+            event = json.loads(payload.decode('utf-8'))
         
-        if user and purchase:
-            # Update purchase status
-            purchase.status = "completed"
-            purchase.stripe_payment_intent_id = session.get('payment_intent')
+        print(f"Webhook received: {event.get('type')}")
+        
+        # Handle the event
+        if event.get('type') == 'checkout.session.completed':
+            session = event['data']['object']
+            user_id = session['metadata']['user_id']
+            tier = session['metadata']['tier']
+            credits = int(session['metadata']['credits'])
             
-            # Add credits to user
-            user.credits_remaining += credits
-            user.total_credits_purchased += credits
+            print(f"Processing payment for user {user_id}: {credits} credits")
             
-            db.commit()
-    
-    return {"status": "success"}
+            # Find the user and purchase
+            user = db.query(User).filter(User.id == user_id).first()
+            purchase = db.query(Purchase).filter(
+                Purchase.stripe_session_id == session['id']
+            ).first()
+            
+            if user and purchase:
+                # Update purchase status
+                purchase.status = "completed"
+                purchase.stripe_payment_intent_id = session.get('payment_intent')
+                
+                # Add credits to user
+                old_credits = user.credits_remaining
+                user.credits_remaining += credits
+                user.total_credits_purchased += credits
+                
+                db.commit()
+                
+                print(f"✅ Credits added: {old_credits} → {user.credits_remaining}")
+            else:
+                print(f"❌ User or purchase not found: user={user}, purchase={purchase}")
+        
+        return {"status": "success"}
+        
+    except Exception as e:
+        print(f"Webhook error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 # Image Generation Endpoints
 @app.post("/api/images/generate", response_model=GenerationResponse)
