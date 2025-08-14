@@ -8,4 +8,5 @@ pyjwt[crypto]
 passlib[bcrypt]
 stripe
 sqlalchemy
+psycopg2-binary
 email-validator
