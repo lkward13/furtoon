@@ -1,6 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth, getApiBaseUrl } from '../contexts/AuthContext';
+import SaveImageButton from '../components/SaveImageButton';
+import SocialShareButton from '../components/SocialShareButton';
+import { setupLongPressToSave, isMobile } from '../utils/imageSave';
 
 // Basic styles for starter pack (10 styles)
 const BASIC_STYLES = [
@@ -83,6 +86,19 @@ const CreatePage = () => {
   const [customPrompt, setCustomPrompt] = useState('');
 
   const inputRef = useRef(null);
+  const generatedImageRef = useRef(null);
+
+  // Setup mobile long-press to save when image is generated
+  useEffect(() => {
+    if (imageBase64 && generatedImageRef.current && isMobile()) {
+      const cleanup = setupLongPressToSave(
+        generatedImageRef.current, 
+        imageBase64, 
+        `furtoon-${style || 'artwork'}-${Date.now()}.png`
+      );
+      return cleanup;
+    }
+  }, [imageBase64, style]);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -177,14 +193,7 @@ const CreatePage = () => {
     }
   };
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = imageBase64;
-    link.download = `furtoon-${Date.now()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+
 
   const handleReset = () => {
     setImageFile(null);
@@ -420,17 +429,33 @@ const CreatePage = () => {
                 Your FurToon is Ready! 🎨
               </h2>
               <img
+                ref={generatedImageRef}
                 src={imageBase64}
                 alt={`Generated ${style}`}
-                className="max-w-full h-auto rounded-xl shadow-lg mx-auto mb-6"
+                className="max-w-full h-auto rounded-xl shadow-lg mx-auto mb-6 select-none"
               />
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={handleDownload}
-                  className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  Download PNG
-                </button>
+              
+              {/* Mobile instruction for new users */}
+              {isMobile() && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6 text-sm text-blue-800">
+                  💡 <strong>Mobile tip:</strong> Long-press the image above to save to your camera roll!
+                </div>
+              )}
+              
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <div className="flex gap-3">
+                  <SaveImageButton
+                    imageBase64={imageBase64}
+                    filename={`furtoon-${style || 'artwork'}-${Date.now()}.png`}
+                    variant="primary"
+                  />
+                  <SocialShareButton
+                    imageBase64={imageBase64}
+                    filename={`furtoon-${style || 'artwork'}-${Date.now()}.png`}
+                    shareText={`Check out my ${style || 'AI'} pet portrait from FurToon! 🎨 Transform your pet into amazing artwork at`}
+                    shareUrl="https://furtoonai.com"
+                  />
+                </div>
                 <button
                   onClick={handleReset}
                   className="px-6 py-3 bg-slate-600 text-white font-semibold rounded-lg hover:bg-slate-700 transition-colors"

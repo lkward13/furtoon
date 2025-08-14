@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/Button';
 import Container from '../components/Container';
+import SaveImageButton from '../components/SaveImageButton';
+import SocialShareButton from '../components/SocialShareButton';
 
 const DashboardPage = () => {
   const { user, logout, apiCall, isAdmin, refreshUser } = useAuth();
@@ -161,13 +163,21 @@ const DashboardPage = () => {
                         Credits used: {generation.credits_used}
                       </p>
                       {generation.result_base64 ? (
-                        <a
-                          href={`data:image/png;base64,${generation.result_base64}`}
-                          download={`furtoon-${generation.style.toLowerCase().replace(/\s+/g, '-')}.png`}
-                          className="text-blue-600 hover:text-blue-500 text-sm font-medium"
-                        >
-                          Download Image
-                        </a>
+                        <div className="flex gap-2 justify-center">
+                          <SaveImageButton
+                            imageBase64={`data:image/png;base64,${generation.result_base64}`}
+                            filename={`furtoon-${generation.style.toLowerCase().replace(/\s+/g, '-')}.png`}
+                            variant="minimal"
+                            className="text-xs"
+                          />
+                          <SocialShareButton
+                            imageBase64={`data:image/png;base64,${generation.result_base64}`}
+                            filename={`furtoon-${generation.style.toLowerCase().replace(/\s+/g, '-')}.png`}
+                            shareText={`Amazing ${generation.style} pet portrait created with FurToon AI! 🎨`}
+                            shareUrl="https://furtoonai.com"
+                            className="scale-90"
+                          />
+                        </div>
                       ) : (
                         <span className="text-slate-400 text-sm">Image data not available</span>
                       )}
