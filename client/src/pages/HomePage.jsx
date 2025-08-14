@@ -93,7 +93,7 @@ const HomePage = () => {
             <Button as={Link} to="/create" size="lg" className="text-lg px-8 py-4">
               ✨ Create Portrait - Starting $9.99
             </Button>
-            <Button as={Link} to="/pricing" variant="secondary" size="lg" className="text-lg px-8 py-4">
+            <Button as={Link} to="/styles" variant="secondary" size="lg" className="text-lg px-8 py-4">
               View Examples
             </Button>
           </div>
