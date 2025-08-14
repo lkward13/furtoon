@@ -12,8 +12,14 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Database configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./furtoon.db")
+# Database configuration - use persistent volume on Railway
+# Create data directory if using persistent volume
+if os.path.exists("/app/data"):
+    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/furtoon.db")
+    os.makedirs("./data", exist_ok=True)
+else:
+    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./furtoon.db")
+
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
