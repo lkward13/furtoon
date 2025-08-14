@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5002/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (window.location.hostname === 'localhost' ? 'http://localhost:5002/api' : 'https://furtoon-production.up.railway.app/api');
 
 export function useAuth() {
   const context = useContext(AuthContext);
