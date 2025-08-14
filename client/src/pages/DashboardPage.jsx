@@ -11,10 +11,20 @@ const DashboardPage = () => {
   const [generations, setGenerations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   useEffect(() => {
     fetchGenerations();
     refreshUser(); // Refresh user data to ensure credit balance is current
+    
+    // Check for payment success in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment') === 'success') {
+      setPaymentSuccess(true);
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      setTimeout(() => setPaymentSuccess(false), 5000);
+    }
   }, []);
 
   const fetchGenerations = async () => {
@@ -52,6 +62,19 @@ const DashboardPage = () => {
     <div className="bg-slate-50 min-h-screen py-20">
       <Container>
         <div className="max-w-4xl mx-auto">
+          {/* Payment Success Message */}
+          {paymentSuccess && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+              <div className="flex items-center">
+                <span className="text-green-600 text-xl mr-3">🎉</span>
+                <div>
+                  <h3 className="font-semibold text-green-800">Payment Successful!</h3>
+                  <p className="text-green-700">Your credits have been added to your account. Start creating amazing art!</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {/* Header */}
           <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
             <div className="flex justify-between items-start">

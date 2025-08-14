@@ -2,8 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../components/Button';
 import Container from '../components/Container';
+import StripePaymentButton from '../components/StripePaymentButton';
+import { useAuth } from '../contexts/AuthContext';
 
 const PricingPage = () => {
+  const { isAuthenticated } = useAuth();
   return (
     <div className="bg-slate-50 min-h-screen py-20">
       <Container>
@@ -46,9 +49,17 @@ const PricingPage = () => {
                 Instant download
               </li>
             </ul>
-            <Button as={Link} to="/create" className="w-full">
-              Get Started
-            </Button>
+            {isAuthenticated ? (
+              <StripePaymentButton 
+                tier="starter"
+                price="$9.99"
+                credits="10"
+              />
+            ) : (
+              <Button as={Link} to="/login" className="w-full">
+                Sign In to Purchase
+              </Button>
+            )}
           </div>
 
           {/* Pro Pack */}
@@ -82,9 +93,17 @@ const PricingPage = () => {
               </li>
 
             </ul>
-            <Button as={Link} to="/create" className="w-full">
-              Get Started
-            </Button>
+            {isAuthenticated ? (
+              <StripePaymentButton 
+                tier="pro"
+                price="$14.99"
+                credits="20"
+              />
+            ) : (
+              <Button as={Link} to="/login" className="w-full">
+                Sign In to Purchase
+              </Button>
+            )}
           </div>
 
           {/* Ultimate Pack */}
@@ -122,9 +141,17 @@ const PricingPage = () => {
               </li>
 
             </ul>
-            <Button as={Link} to="/create" className="w-full">
-              Get Started
-            </Button>
+            {isAuthenticated ? (
+              <StripePaymentButton 
+                tier="ultimate"
+                price="$19.99"
+                credits="50"
+              />
+            ) : (
+              <Button as={Link} to="/login" className="w-full">
+                Sign In to Purchase
+              </Button>
+            )}
           </div>
         </div>
 
