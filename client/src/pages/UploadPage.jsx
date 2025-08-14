@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
+import { getApiBaseUrl } from '../contexts/AuthContext';
 
 const styles = [
   // Animation Styles
@@ -121,7 +122,7 @@ const UploadPage = () => {
       formData.append('imageFile', imageFile);
       formData.append('style', isCustomMode ? customPrompt.trim() : style);
 
-      const response = await axios.post('http://localhost:5002/api/images/generate', formData, {
+      const response = await axios.post(`${getApiBaseUrl()}/images/generate`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

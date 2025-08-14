@@ -341,7 +341,7 @@ const CreatePage = () => {
                           type="button"
                           onClick={() => available && setStyle(s)}
                           disabled={!available}
-                          className={`w-full p-4 rounded-lg border-2 text-sm font-medium transition-all ${
+                          className={`w-full h-20 p-4 rounded-lg border-2 text-sm font-medium transition-all flex items-center justify-center text-center leading-tight ${
                             !available
                               ? 'border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed opacity-60'
                               : style === s
