@@ -468,6 +468,51 @@ async def get_pricing_tiers():
     """Get all pricing tier information"""
     return PRICING_TIERS
 
+# Admin endpoints
+@app.post("/api/admin/update-credits")
+async def admin_update_credits(
+    user_email: str = Form(...),
+    new_credits: int = Form(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Admin endpoint to update any user's credits
+    Only accessible by admin accounts (lkward13@gmail.com)
+    """
+    # Check if current user is admin
+    if current_user.email != "lkward13@gmail.com":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Admin privileges required."
+        )
+    
+    # Find the target user
+    target_user = db.query(User).filter(User.email == user_email).first()
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with email {user_email} not found"
+        )
+    
+    # Update credits
+    old_credits = target_user.credits_remaining
+    target_user.credits_remaining = new_credits
+    
+    # If giving unlimited credits (999999), also set high total_credits_purchased
+    if new_credits >= 999999:
+        target_user.total_credits_purchased = 999999
+    
+    db.commit()
+    
+    return {
+        "success": True,
+        "message": f"Updated {user_email} credits from {old_credits} to {new_credits}",
+        "user_email": user_email,
+        "old_credits": old_credits,
+        "new_credits": new_credits
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5001)
