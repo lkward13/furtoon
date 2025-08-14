@@ -54,6 +54,7 @@ allowed_origins = [
     "https://furtoon-m1ir8ggqb-luke-wards-projects.vercel.app",
     "https://furtoon-3mmf6fl9x-luke-wards-projects.vercel.app",
     "https://www.furtoonai.com",
+    "https://furtoonai.com",  # Without www
     "http://localhost:5173",  # For local development
 ]
 
