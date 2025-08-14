@@ -482,7 +482,7 @@ async def admin_update_credits(
     Only accessible by admin accounts (lkward13@gmail.com)
     """
     # Check if current user is admin
-    if current_user.email not in ["lkward13@gmail.com", "admin@furtoonai.com", "testadmin@furtoonai.com"]:
+    if current_user.email not in ["lkward13@gmail.com", "admin@furtoonai.com", "testadmin@furtoonai.com", "freshfurt@gmail.com"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied. Admin privileges required."
