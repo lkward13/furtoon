@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, getApiBaseUrl } from '../contexts/AuthContext';
 
 // Basic styles for starter pack (10 styles)
 const BASIC_STYLES = [
@@ -154,7 +154,7 @@ const CreatePage = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:5002/api/images/generate',
+        `${getApiBaseUrl()}/images/generate`,
         formData,
         {
           headers: {

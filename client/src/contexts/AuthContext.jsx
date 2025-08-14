@@ -13,6 +13,9 @@ export function useAuth() {
   return context;
 }
 
+// Export API_BASE_URL for use in other components
+export const getApiBaseUrl = () => API_BASE_URL;
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
